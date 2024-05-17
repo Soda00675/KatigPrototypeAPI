@@ -75,7 +75,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Profile endpoint
-router.get('/profile', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const user = await UserModel.findById(req.user.userId).select('-password');
     if (!user) {
