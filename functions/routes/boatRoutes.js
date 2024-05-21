@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Boat = require('../models/boatModel'); // Adjust the path as necessary
+const Boat = require('../models/boatModel'); // Ensure the path is correct and matches your directory structure
 
 // Middleware to get boat by ID
 async function getBoat(req, res, next) {

@@ -3,6 +3,9 @@ const serverless = require('serverless-http');
 const router = require('./routes/userRoutes');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bookingRoutes = require('./routes/bookingRoutes');
+const boatRoutes = require('./routes/boatRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -14,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 mongoose
 .connect(dbCloudUrl || dbLocalUrl)
 .then(() => console.log('Connected to MongoDB'))
@@ -23,6 +27,6 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
 
-app.use('/.netlify/functions/app', router);
+app.use('/.netlify/functions/app', router, bookingRoutes, boatRoutes, feedbackRoutes);
 
 module.exports.handler = serverless(app);
