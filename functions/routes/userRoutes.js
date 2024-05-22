@@ -1,78 +1,89 @@
 const express = require('express');
-const router = express.Router();
-const Boat = require('../models/boatModel'); // Adjust the path as necessary
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const UserModel = require('../models/userModel');
 
-// Middleware to get boat by ID
-async function getBoat(req, res, next) {
-  let boat;
+const router = express.Router();
+const secretKey = 'your_jwt_secret_key'; // Use a secure key in production
+
+// Middleware to get user by ID
+async function getUser(req, res, next) {
+  let user;
   try {
-    boat = await Boat.findById(req.params.id);
-    if (!boat) {
-      return res.status(404).json({ message: 'Boat not found' });
+    user = await UserModel.findById(req.params.id);
+    if (user == null) {
+      return res.status(404).json({ message: 'Cannot find user' });
     }
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
-  res.boat = boat;
+  res.user = user;
   next();
 }
 
-// Register a new boat
-router.post('/boat', async (req, res) => {
-  const { boatType, capacity, owner } = req.body;
+// Middleware to authenticate token
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, secretKey, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
+
+// Signup
+router.post('/signup', async (req, res) => {
+  const { fullName, username, email, password } = req.body;
   try {
-    const boat = new Boat({ boatType, capacity, owner });
-    const newBoat = await boat.save();
-    res.status(201).json(newBoat);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new UserModel({ fullName, username, email, password: hashedPassword });
+    const newUser = await user.save();
+    console.log('User created:', newUser); // Debug statement
+    res.status(201).json(newUser);
   } catch (err) {
-    console.error(err);
+    console.error(err); // Debug statement
     res.status(400).json({ message: err.message });
   }
 });
 
-// Get all boats
-router.get('/boat', async (req, res) => {
+// Login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
   try {
-    const boats = await Boat.find();
-    res.json(boats);
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      console.log('User not found'); // Debug statement
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.log('Invalid password'); // Debug statement
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: '1h' });
+    console.log('Login successful'); // Debug statement
+    res.json({ token, userId: user._id });
   } catch (err) {
-    console.error(err);
+    console.error(err); // Debug statement
     res.status(500).json({ message: err.message });
   }
 });
 
-// Get a specific boat
-router.get('/boat/:id', getBoat, (req, res) => {
-  res.json(res.boat);
-});
-
-// Update a boat
-router.patch('/boat/:id', getBoat, async (req, res) => {
-  if (req.body.boatType != null) {
-    res.boat.boatType = req.body.boatType;
-  }
-  if (req.body.capacity != null) {
-    res.boat.capacity = req.body.capacity;
-  }
-  if (req.body.owner != null) {
-    res.boat.owner = req.body.owner;
-  }
+// Profile endpoint
+router.get('/', authenticateToken, async (req, res) => {
   try {
-    const updatedBoat = await res.boat.save();
-    res.json(updatedBoat);
+    const user = await UserModel.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete a boat
-router.delete('/boat/:id', getBoat, async (req, res) => {
-  try {
-    await res.boat.remove();
-    res.json({ message: 'Boat deleted' });
-  } catch (err) {
-    console.error(err);
+    console.error(err); // Debug statement
     res.status(500).json({ message: err.message });
   }
 });
