@@ -28,7 +28,7 @@ const bookingSchema = new Schema({
   },
   passengerType: {
     type: String,
-    enum: ['student', 'senior', 'adult'],
+    enum: ['student', 'senior', 'adult', 'PWD'],
     required: true
   }
 });
