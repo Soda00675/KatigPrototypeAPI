@@ -19,9 +19,9 @@ async function getFeedback(req, res, next) {
 
 // Create new feedback
 router.post('/feedback', async (req, res) => {
-  const { userId, rating, message } = req.body;
+  const { rating, message } = req.body;
   try {
-    const feedback = new Feedback({ userId, rating, message });
+    const feedback = new Feedback({ rating, message });
     const newFeedback = await feedback.save();
     res.status(201).json(newFeedback);
   } catch (err) {
@@ -29,6 +29,7 @@ router.post('/feedback', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 // Get all feedback
 router.get('/feedback', async (req, res) => {
