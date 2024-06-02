@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Feedback = require('../models/feedbackModel'); // Adjust the path as necessary
+const { authenticateToken } = require('./userRoutes');
 
 // Middleware to get feedback by ID
 async function getFeedback(req, res, next) {
@@ -29,6 +30,7 @@ router.post('/feedback', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 // Get all feedback
 router.get('/feedback', async (req, res) => {
