@@ -9,13 +9,9 @@ const bookingSchema = new Schema({
   },
   bookingId: {
     type: String,
-    default: () => new mongoose.Types.ObjectId().toString(), // Generates a new unique bookingId automatically
-    unique: true, // Ensures bookingId is unique
-    index: true // Adds an index to the bookingId field
-  },
-  boatId: {
-    type: String,
-    required: true
+    default: () => new mongoose.Types.ObjectId().toString(),
+    unique: true,
+    index: true
   },
   dateTime: {
     type: Date,
@@ -33,4 +29,4 @@ const bookingSchema = new Schema({
   }
 });
 
-module.exports = bookingSchema;
+module.exports = bookingSchema; // Ensure the schema is exported properly

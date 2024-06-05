@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Booking = require('../models/bookingModel'); // Ensure the path is correct and matches your directory structure
+const Booking = require('../models/bookingModel');  // Ensure the path is correct and matches your directory structure
+const authenticateToken = require('../middleware/authenticateToken'); // Adjust path as needed
 
 // Middleware to get booking by ID
 async function getBooking(req, res, next) {
@@ -18,10 +19,15 @@ async function getBooking(req, res, next) {
 }
 
 // Create a new booking
-router.post('/booking', async (req, res) => {
-  const { userId, boatId, dateTime, destination, passengerType } = req.body;
+router.post('/booking', authenticateToken, async (req, res) => {
+  const { dateTime, destination, passengerType } = req.body;
   try {
-    const booking = new Booking({ userId, boatId, dateTime, destination, passengerType });
+    const booking = new Booking({
+      userId: req.user.userId, // Use the authenticated user's ID
+      dateTime,
+      destination,
+      passengerType
+    });
     const newBooking = await booking.save();
     res.status(201).json(newBooking);
   } catch (err) {
@@ -48,12 +54,6 @@ router.get('/booking/:id', getBooking, (req, res) => {
 
 // Update a booking
 router.patch('/booking/:id', getBooking, async (req, res) => {
-  if (req.body.userId != null) {
-    res.booking.userId = req.body.userId;
-  }
-  if (req.body.boatId != null) {
-    res.booking.boatId = req.body.boatId;
-  }
   if (req.body.dateTime != null) {
     res.booking.dateTime = req.body.dateTime;
   }

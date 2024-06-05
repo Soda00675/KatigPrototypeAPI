@@ -9,12 +9,12 @@ const userSchema = new Schema({
   username: {
     type: String,
     required: true,
-    unique: true 
+    unique: true
   },
   email: {
     type: String,
     required: true,
-    unique: true 
+    unique: true
   },
   password: {
     type: String,
@@ -22,4 +22,4 @@ const userSchema = new Schema({
   }
 });
 
-module.exports = userSchema;
+module.exports = userSchema; // Ensure the schema is exported properly
