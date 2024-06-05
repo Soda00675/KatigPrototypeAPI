@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const Booking = require('../models/bookingModel'); // Ensure the path is correct and matches your directory structure
+const Booking = require('../models/bookingModel');
+const authenticateToken = require('../middleware/authenticateToken'); // Ensure the path is correct
 
 // Middleware to get booking by ID
 async function getBooking(req, res, next) {
   let booking;
   try {
-    booking = await Booking.findById(req.params.id);
+    booking = await Booking.findById(req.params.id).populate('userId');
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
     }
@@ -18,10 +19,11 @@ async function getBooking(req, res, next) {
 }
 
 // Create a new booking
-router.post('/booking', async (req, res) => {
-  const { userId, boatId, dateTime, destination, passengerType } = req.body;
+router.post('/booking', authenticateToken, async (req, res) => {
+  const { dateTime, destination, passengerType } = req.body;
+  const userId = req.user._id;
   try {
-    const booking = new Booking({ userId, boatId, dateTime, destination, passengerType });
+    const booking = new Booking({ userId, dateTime, destination, passengerType });
     const newBooking = await booking.save();
     res.status(201).json(newBooking);
   } catch (err) {
@@ -31,9 +33,9 @@ router.post('/booking', async (req, res) => {
 });
 
 // Get all bookings
-router.get('/booking', async (req, res) => {
+router.get('/booking', authenticateToken, async (req, res) => {
   try {
-    const bookings = await Booking.find();
+    const bookings = await Booking.find({ userId: req.user._id });
     res.json(bookings);
   } catch (err) {
     console.error(err);
@@ -42,18 +44,12 @@ router.get('/booking', async (req, res) => {
 });
 
 // Get a specific booking
-router.get('/booking/:id', getBooking, (req, res) => {
+router.get('/booking/:id', authenticateToken, getBooking, (req, res) => {
   res.json(res.booking);
 });
 
 // Update a booking
-router.patch('/booking/:id', getBooking, async (req, res) => {
-  if (req.body.userId != null) {
-    res.booking.userId = req.body.userId;
-  }
-  if (req.body.boatId != null) {
-    res.booking.boatId = req.body.boatId;
-  }
+router.patch('/booking/:id', authenticateToken, getBooking, async (req, res) => {
   if (req.body.dateTime != null) {
     res.booking.dateTime = req.body.dateTime;
   }
@@ -73,7 +69,7 @@ router.patch('/booking/:id', getBooking, async (req, res) => {
 });
 
 // Delete a booking
-router.delete('/booking/:id', getBooking, async (req, res) => {
+router.delete('/booking/:id', authenticateToken, getBooking, async (req, res) => {
   try {
     await res.booking.remove();
     res.json({ message: 'Booking deleted' });
