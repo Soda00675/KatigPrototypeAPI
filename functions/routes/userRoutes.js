@@ -38,6 +38,10 @@ function authenticateToken(req, res, next) {
 router.post('/signup', async (req, res) => {
   const { fullName, username, email, password } = req.body;
   try {
+    const existingUser = await UserModel.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email or username already exists' });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new UserModel({ fullName, username, email, password: hashedPassword });
     const newUser = await user.save();
@@ -48,6 +52,7 @@ router.post('/signup', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
 
 // Login
 router.post('/login', async (req, res) => {
