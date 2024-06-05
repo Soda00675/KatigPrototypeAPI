@@ -13,10 +13,6 @@ const bookingSchema = new Schema({
     unique: true, // Ensures bookingId is unique
     index: true // Adds an index to the bookingId field
   },
-  boatId: {
-    type: String,
-    required: true
-  },
   dateTime: {
     type: Date,
     required: true
@@ -33,4 +29,4 @@ const bookingSchema = new Schema({
   }
 });
 
-module.exports = bookingSchema;
+module.exports = mongoose.model('Booking', bookingSchema);
