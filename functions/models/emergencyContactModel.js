@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const emergencyContactSchema = require('../schema/emergencyContact'); // Adjust the path as necessary
+const emergencyContactSchema = require('../schema/emergencyContact'); // Correct relative path
 
 const EmergencyContactModel = mongoose.model('EmergencyContact', emergencyContactSchema);
 

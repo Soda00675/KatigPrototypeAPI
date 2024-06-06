@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Feedback = require('../models/feedbackModel'); // Adjust the path as necessary
-const { authenticateToken } = require('./userRoutes');
+const authenticateToken = require('../middleware/authenticateToken');
 
 // Middleware to get feedback by ID
 async function getFeedback(req, res, next) {
@@ -19,10 +19,14 @@ async function getFeedback(req, res, next) {
 }
 
 // Create new feedback
-router.post('/feedback', async (req, res) => {
-  const { userId, rating, message } = req.body;
+router.post('/feedback', authenticateToken, async (req, res) => {
+  const { rating, message } = req.body;
   try {
-    const feedback = new Feedback({ userId, rating, message });
+    const feedback = new Feedback({
+      userId: req.user.userId, // Use userId from authenticated token
+      rating,
+      message
+    });
     const newFeedback = await feedback.save();
     res.status(201).json(newFeedback);
   } catch (err) {
@@ -30,7 +34,6 @@ router.post('/feedback', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
 
 // Get all feedback
 router.get('/feedback', async (req, res) => {
@@ -49,7 +52,7 @@ router.get('/feedback/:id', getFeedback, (req, res) => {
 });
 
 // Update feedback
-router.patch('/feedback/:id', getFeedback, async (req, res) => {
+router.patch('/feedback/:id', authenticateToken, getFeedback, async (req, res) => {
   if (req.body.rating != null) {
     res.feedback.rating = req.body.rating;
   }
@@ -66,7 +69,7 @@ router.patch('/feedback/:id', getFeedback, async (req, res) => {
 });
 
 // Delete feedback
-router.delete('/feedback/:id', getFeedback, async (req, res) => {
+router.delete('/feedback/:id', authenticateToken, getFeedback, async (req, res) => {
   try {
     await res.feedback.remove();
     res.json({ message: 'Feedback deleted' });

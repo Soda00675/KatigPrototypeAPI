@@ -6,7 +6,8 @@ const cors = require('cors');
 const bookingRoutes = require('./routes/bookingRoutes');
 const boatRoutes = require('./routes/boatRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
-const PORT = process.env.PORT || 3000;
+const emergencyContactRoutes = require('./routes/emergencyContactRoutes');
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 // your mongodb Cloud URL
@@ -27,6 +28,6 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
 
-app.use('/.netlify/functions/app', router, bookingRoutes, boatRoutes, feedbackRoutes);
+app.use('/.netlify/functions/app', router, bookingRoutes, boatRoutes, feedbackRoutes, emergencyContactRoutes);
 
 module.exports.handler = serverless(app);
