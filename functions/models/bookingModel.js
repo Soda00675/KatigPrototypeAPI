@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const emergencyContactSchema = require('../schema/emergencyContact'); // Adjust the path as necessary
+const bookingSchema = require('../schema/booking'); // Adjust the path as necessary
 
-const EmergencyContactModel = mongoose.model('EmergencyContact', emergencyContactSchema);
+const BookingModel = mongoose.model('Booking', bookingSchema);
 
-module.exports = EmergencyContactModel;
+module.exports = BookingModel;
